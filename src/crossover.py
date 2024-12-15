@@ -14,6 +14,9 @@ def discrete_crossover(selected_population):
                        offspring is a combination of genes from two parents.
     """
 
+    #TODO: Make the routes not have duplicate cities
+
+
     offspring = []
     for i in range(0, len(selected_population), 2):
         p1, p2 = selected_population[i], selected_population[i+1]

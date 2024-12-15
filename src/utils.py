@@ -1,6 +1,71 @@
 import random
+import numpy as np
+from sklearn.manifold import MDS
+
+def generate_mds_coordinates(distance_matrix, city_names):
+    """
+    Generates Multi-Dimensional Scaling (MDS) coordinates for the distance matrix.
+    Parameters:
+        distance_matrix (2D array): A precomputed distance matrix representing the 
+                                      dissimilarities between cities.
+        city_names (list of str): A list of city names corresponding to the rows/columns
+                                  of the distance matrix.
+    Returns:
+        (dict): A dictionary where the keys are city names and the values are tuples representing 
+                the coordinates in the two-dimensional space.
+    """
+
+    # The MDS instance is initialized with n_components=2, indicating that the data will 
+    # be reduced to two dimensions. The dissimilarity parameter is set to "precomputed", 
+    # meaning that the input distance matrix is already computed and will be used directly. 
+    # The random_state=42 parameter ensures that the results are reproducible by setting a 
+    # seed for the random number generator.
+
+    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=42)
+
+    # This method computes the coordinates of the points in the two-dimensional space based
+    # on the provided distance matrix.
+
+    coords = mds.fit_transform(distance_matrix)
+
+    # Map coordinates to city names using dictionary comprehension.
+    return {city: tuple(coord) for city, coord in zip(city_names, coords)}
+
+def create_distance_matrix(city_names, adjacency_list):
+    """
+    Creates a distance matrix between all cities and their corresponding neigbors.
+    Parameters:
+        city_names (list of str): A list of city names.
+        adjacency_list (dict): A dictionary where keys are city names and values are lists of tuples.
+                               Each tuple contains a distance (float) and a neighboring city name (str).
+    Returns:
+        (numpy.ndarray): A 2D numpy array representing the distance matrix, where the element at [i, j]
+                         is the distance between city i and city j. If there is no direct path between
+                         two cities, the distance is set to infinity.
+    """
+
+    n = len(city_names)
+    distance_matrix = np.full((n, n), 0)
+    
+    city_to_index = {city: idx for idx, city in enumerate(city_names)}
+
+    for city, neighbors in adjacency_list.items():
+        for distance, neighbor in neighbors:
+            i, j = city_to_index[city], city_to_index[neighbor]
+            distance_matrix[i][j] = distance
+            distance_matrix[j][i] = distance
+    
+    return distance_matrix
 
 def generate_population(population_size):
+    """
+    Generates a population of chromosomes for a genetic algorithm.
+    Args:
+        population_size (int): The number of chromosomes to generate.
+    Returns:
+        (list): A list of chromosomes, where each chromosome is a list of cities in random order.
+    """
+
     population = []
     for i in range(population_size):
         population.append(list(dist.keys()))
@@ -8,6 +73,14 @@ def generate_population(population_size):
     return population
 
 def evaluate_chromosome(chromosome):
+    """
+    Evaluates the total distance of a given chromosome (route).
+    Args:
+        chromosome (list): A list of cities representing a route.
+    Returns:
+        (int): The total distance of the route.
+    """
+
     distance = 0
     for i in range(len(chromosome) - 1):
         for pair in dist[chromosome[i]]:

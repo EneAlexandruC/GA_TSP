@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 def mutation_by_change(offspring, pm):
     """
@@ -17,7 +18,7 @@ def mutation_by_change(offspring, pm):
         if rd_values[i] > pm:
             continue
 
-        rd_indices = np.random.sample(range(0, len(offspring[i])), 2)
+        rd_indices = random.sample(range(0, len(offspring[i])), 2)
         offspring[i][rd_indices[0]], offspring[i][rd_indices[1]] = offspring[i][rd_indices[1]], offspring[i][rd_indices[0]]
     
     return offspring
